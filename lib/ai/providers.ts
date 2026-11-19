@@ -7,7 +7,7 @@ export interface Provider {
   complete(prompt: string, opts: { json: boolean }): Promise<string>;
 }
 
-const TIMEOUT_MS = 25_000;
+const TIMEOUT_MS = 45_000;
 
 async function postJson(url: string, body: unknown, headers: Record<string, string> = {}): Promise<unknown> {
   const res = await fetch(url, {
@@ -38,7 +38,7 @@ function asText(v: unknown, provider: string): string {
 }
 
 function gemini(apiKey: string): Provider {
-  const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
   return {
     name: "gemini",
     model,

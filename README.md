@@ -34,7 +34,7 @@ Copy `.env.example` to `.env.local` and pick a provider. Restart `npm run dev` a
 | Provider | Set | Notes |
 |---|---|---|
 | **Mock** (default with no keys) | nothing, or `AI_PROVIDER=mock` | Deterministic outputs built from the real inputs. Mock scoring really evaluates the ICP, so editing the ICP still changes scores offline. |
-| **Gemini** | `AI_PROVIDER=gemini`, `GEMINI_API_KEY=…` | Free tier key from Google AI Studio. Default model `gemini-2.5-flash`. |
+| **Gemini** | `AI_PROVIDER=gemini`, `GEMINI_API_KEY=…` | Free tier key from Google AI Studio. Default model `gemini-3.5-flash-lite`. |
 | **Groq** | `AI_PROVIDER=groq`, `GROQ_API_KEY=…` | Free tier. Default model `llama-3.3-70b-versatile`. |
 | **Ollama** | `AI_PROVIDER=ollama`, optional `OLLAMA_URL` | Local, fully offline. `ollama pull llama3.1` first. |
 
