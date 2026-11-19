@@ -11,7 +11,9 @@ export type DB = BetterSQLite3Database<typeof schema>;
 const globalForDb = globalThis as unknown as { __signalflowDb?: DB };
 
 function create(): DB {
-  const file = path.resolve(process.env.DATABASE_PATH ?? "./data/signalflow.db");
+  // On Vercel only /tmp is writable; the DB is re-seeded on each cold start.
+  const fallback = process.env.VERCEL ? "/tmp/signalflow.db" : "./data/signalflow.db";
+  const file = path.resolve(process.env.DATABASE_PATH ?? fallback);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const sqlite = new Database(file);
   sqlite.pragma("journal_mode = WAL");
