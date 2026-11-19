@@ -1,103 +1,132 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Download, Radar, Sparkles, Send, Eye, MessageSquare, Handshake, Cpu } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/empty-state";
+import { dashboardStats, recentActivity } from "@/lib/queries";
+import { providerLabel } from "@/lib/ai";
+import { now } from "@/lib/clock";
+import { pct, usd } from "@/lib/format";
+import { SendsChart } from "./dashboard-charts";
+import { ActivityFeed } from "./activity-feed";
 
-export default function Home() {
+export default function Dashboard() {
+  const { kpis, funnel, series, cost } = dashboardStats();
+  const feed = recentActivity(20);
+  const nowMs = now().getTime();
+  const provider = providerLabel();
+
+  const tiles = [
+    { label: "Signals (24h)", value: kpis.signals24h.toString(), Icon: Radar, href: "/signals" },
+    { label: "Leads researched", value: kpis.researched.toString(), Icon: Sparkles, href: "/leads" },
+    { label: "Emails sent", value: kpis.sent.toString(), Icon: Send, href: "/outreach" },
+    { label: "Open rate", value: pct(kpis.openRate), Icon: Eye, href: "/outreach" },
+    { label: "Reply rate", value: pct(kpis.replyRate), Icon: MessageSquare, href: "/replies" },
+    { label: "Interested", value: kpis.interested.toString(), Icon: Handshake, href: "/replies" },
+  ];
+  const top = funnel[0].value || 1;
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <>
+      <PageHeader
+        title="Dashboard"
+        description="Signals in, qualified conversations out."
+        actions={
+          <>
+            <a href="/api/export?kind=outcomes" className={buttonVariants({ variant: "outline", size: "sm" })}><Download /> Export outcomes</a>
+            <Link href="/signals" className={buttonVariants({ size: "sm" })}><Radar /> View signals</Link>
+          </>
+        }
+      />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {tiles.map(({ label, value, Icon, href }, i) => (
+          <Link key={label} href={href} className="group animate-in-up" style={{ animationDelay: `${i * 40}ms` }}>
+            <Card size="sm" className="h-full transition-colors group-hover:ring-primary/40">
+              <CardHeader>
+                <CardDescription className="flex items-center gap-1.5"><Icon className="size-3.5" /> {label}</CardDescription>
+                <p className="text-3xl font-semibold tracking-tight tabular-nums">{value}</p>
+              </CardHeader>
+            </Card>
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-5">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Sends and replies, last 14 days</CardTitle>
+            <CardDescription>Daily counts on the simulated clock.</CardDescription>
+          </CardHeader>
+          <CardContent><SendsChart data={series} /></CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Funnel</CardTitle>
+            <CardDescription>Conversion from each stage to the next.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {funnel.map((f, i) => {
+              const prev = i > 0 ? funnel[i - 1].value : null;
+              const conv = prev ? f.value / prev : null;
+              return (
+                <div key={f.stage} title={`${f.stage}: ${f.value}${conv !== null ? ` (${pct(conv)} of previous stage)` : ""}`}>
+                  <div className="mb-1 flex items-baseline justify-between text-sm">
+                    <span>{f.stage}</span>
+                    <span className="tabular-nums">
+                      <span className="font-semibold">{f.value}</span>
+                      {conv !== null && <span className="ml-2 text-xs text-muted-foreground">{pct(conv)}</span>}
+                    </span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded bg-muted">
+                    <div className="h-full rounded" style={{ width: `${Math.max(2, (f.value / top) * 100)}%`, background: "var(--series-1)" }} />
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-5">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="live-dot size-2 rounded-full bg-emerald-500" /> Live activity
+            </CardTitle>
+            <CardDescription>Refreshes every 15 seconds.</CardDescription>
+          </CardHeader>
+          <CardContent><ActivityFeed items={feed} nowMs={nowMs} /></CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Cpu className="size-4" /> AI cost</CardTitle>
+            <CardDescription>
+              Provider: {provider.name === "mock" ? "mock (offline)" : `${provider.name} · ${provider.model}`}. Estimates use Gemini 2.5 Flash list prices; the free tier is $0.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs text-muted-foreground">Estimated AI calls</p>
+                <p className="text-2xl font-semibold tabular-nums">{cost.estimatedCalls}</p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs text-muted-foreground">Cost per interested lead</p>
+                <p className="text-2xl font-semibold tabular-nums">{cost.costPerInterested === null ? "—" : usd(cost.costPerInterested)}</p>
+              </div>
+            </div>
+            <dl className="space-y-1.5 text-sm">
+              <div className="flex justify-between"><dt className="text-muted-foreground">Estimated pipeline cost</dt><dd className="tabular-nums">{usd(cost.estimatedCost)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted-foreground">Per call (≈700 in / 250 out tokens)</dt><dd className="tabular-nums">{usd(cost.perCall)}</dd></div>
+              <div className="flex justify-between border-t pt-1.5"><dt className="text-muted-foreground">Calls this session: live / cached / mock</dt><dd className="tabular-nums">{cost.logged.live} / {cost.logged.cached} / {cost.logged.mock}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted-foreground">Actual live spend</dt><dd className="tabular-nums">{usd(cost.logged.liveCost)}</dd></div>
+            </dl>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
