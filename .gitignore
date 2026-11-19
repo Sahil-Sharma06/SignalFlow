@@ -44,3 +44,6 @@ next-env.d.ts
 /data
 
 !.env.example
+
+# private study guide
+/PROJECT_GUIDE.md
